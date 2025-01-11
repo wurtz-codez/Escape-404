@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Stickman Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+</head>
+
+<body>
+    <div id="particles-js"></div>
+    <div class="container">
+        <div class="icon-container question-icon">
+            <i class="fa fa-question-circle" onclick="showPopup('QUESTION', 'fa-question-circle')"></i>
+            <div id="particles-question"></div>
+        </div>
+        <div class="icon-container pencil-icon">
+            <i class="fa fa-pencil" onclick="showPopup('TASK', 'fa-pencil')"></i>
+            <div id="particles-pencil"></div>
+        </div>
+        <div class="icon-container puzzle-icon">
+            <i class="fa fa-puzzle-piece" onclick="showPopup('PUZZLE', 'fa-puzzle-piece')"></i>
+            <div id="particles-puzzle"></div>
+        </div>
+        <div class="stickman">
+            <div class="head"></div>
+            <div class="body"></div>
+            <div class="left-arm"></div>
+            <div class="right-arm"></div>
+            <div class="left-leg"></div>
+            <div class="right-leg"></div>
+        </div>
+        <div class="arrow-line"></div>
+        <div class="arrow-down" onclick="removeLastIcon()"></div>
+    </div>
+
+    <div class="team-info">
+        <p>Team Name: Quest Seekers</p>
+        <p>Lives: 
+            <i class="fa fa-heart"></i>
+            <i class="fa fa-heart"></i>
+            <i class="fa fa-heart"></i>
+        </p>
+    </div>
+
+    <div id="selected-icons" class="selected-icons"></div>
+
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <span class="close" onclick="closePopup()">&times;</span>
+            <p id="popup-text">QUESTION</p>
+        </div>
+    </div>
+
+    <script>
+        let selectedIconClass = '';
+        let questionCounter = 0;
+        let taskCounter = 0;
+        let puzzleCounter = 0;
+
+        function showPopup(text, iconClass) {
+            if (iconClass === 'fa-question-circle') {
+                questionCounter++;
+                if (questionCounter > 10) {
+                    questionCounter = 1;
+                }
+                text = `QUESTION ${questionCounter}`;
+            } else if (iconClass === 'fa-pencil') {
+                taskCounter++;
+                if (taskCounter > 10) {
+                    taskCounter = 1;
+                }
+                text = `TASK ${taskCounter}`;
+            } else if (iconClass === 'fa-puzzle-piece') {
+                puzzleCounter++;
+                if (puzzleCounter > 10) {
+                    puzzleCounter = 1;
+                }
+                text = `PUZZLE ${puzzleCounter}`;
+            }
+            document.getElementById('popup-text').innerText = text;
+            document.getElementById('popup').style.display = 'block';
+            selectedIconClass = iconClass;
+        }
+
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+            if (selectedIconClass) {
+                selectIcon(selectedIconClass);
+                selectedIconClass = '';
+            }
+        }
+
+        function selectIcon(iconClass) {
+            const selectedIconsContainer = document.getElementById('selected-icons');
+            const iconElement = document.createElement('i');
+            iconElement.className = `fa ${iconClass}`;
+            selectedIconsContainer.appendChild(iconElement);
+        }
+
+        function removeLastIcon() {
+            const selectedIconsContainer = document.getElementById('selected-icons');
+            if (selectedIconsContainer.lastChild) {
+                selectedIconsContainer.removeChild(selectedIconsContainer.lastChild);
+            }
+        }
+    </script>
+    <script src="particles-config.js"></script>
+</body>
+
+</html>
