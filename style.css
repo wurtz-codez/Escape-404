@@ -1,4 +1,5 @@
 body {
+    font-family: Arial, Helvetica, sans-serif;
     background-color: black;
     display: flex;
     justify-content: center;
@@ -216,4 +217,23 @@ body {
     color: black;
     text-decoration: none;
     cursor: pointer;
+}
+
+
+.material-symbols-outlined {
+    font-size: 2rem;
+    color: white;
+    cursor: pointer;
+    position: relative;
+}
+
+.mini-map{
+    border: 2px solid white;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 20vh;
+    height: 20vh;
+    z-index: 1;
+    
 }
