@@ -161,6 +161,10 @@ function submitAnswer() {
             resultMessage.style.color = 'red';
             removeLife(); // Remove a life icon when the answer is incorrect
             showLostLifePopup(); // Show lost life popup
+            if (selectedIconClass) {
+                selectIcon(selectedIconClass); // Record the icon even if the answer is incorrect
+                selectedIconClass = '';
+            }
         }
     }
 }
