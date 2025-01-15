@@ -118,29 +118,51 @@ function closePopup() {
   document.getElementById('result-message').innerText = '';
 }
 
-function submitAnswer() {
-  const selectedOption = document.querySelector('input[name="option"]:checked');
-  if (selectedOption) {
-      const resultMessage = document.getElementById('result-message');
-      if (selectedOption.value === questions[currentQuestionIndex].correct) {
-          resultMessage.innerText = 'Correct';
-          resultMessage.style.color = 'green';
-      } else {
-          resultMessage.innerText = 'Incorrect';
-          resultMessage.style.color = 'red';
-      }
-      setTimeout(() => {
-          closePopup();
-          currentQuestionIndex++;
-          if (currentQuestionIndex < questions.length) {
-              displayQuestion();
-          }
-          if (selectedIconClass) {
-              selectIcon(selectedIconClass);
-              selectedIconClass = '';
-          }
-      }, 1000);
+function removeLife() {
+  const livesContainer = document.querySelector('.team-info p span.material-symbols-outlined');
+  if (livesContainer) {
+      livesContainer.remove();
   }
+}
+
+function showLostLifePopup() {
+    const lostLifePopup = document.createElement('div');
+    lostLifePopup.className = 'lost-life-popup';
+    lostLifePopup.innerHTML = `
+        <p>YOU LOST A LIFE!!</p>
+    `;
+    document.body.appendChild(lostLifePopup);
+    setTimeout(() => {
+        lostLifePopup.remove();
+        closePopup(); // Close the question popup at the same time
+    }, 2500); // Show popup for 3.5 seconds
+}
+
+function submitAnswer() {
+    const selectedOption = document.querySelector('input[name="option"]:checked');
+    if (selectedOption) {
+        const resultMessage = document.getElementById('result-message');
+        if (selectedOption.value === questions[currentQuestionIndex].correct) {
+            resultMessage.innerText = 'Correct';
+            resultMessage.style.color = 'green';
+            setTimeout(() => {
+                closePopup();
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    displayQuestion();
+                }
+                if (selectedIconClass) {
+                    selectIcon(selectedIconClass);
+                    selectedIconClass = '';
+                }
+            }, 1000);
+        } else {
+            resultMessage.innerText = 'Incorrect';
+            resultMessage.style.color = 'red';
+            removeLife(); // Remove a life icon when the answer is incorrect
+            showLostLifePopup(); // Show lost life popup
+        }
+    }
 }
 
 function selectIcon(iconClass) {
