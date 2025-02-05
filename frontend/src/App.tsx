@@ -86,7 +86,7 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-800 to-gray-900 relative overflow-hidden">
       <Particles
         id="tsparticles"
         init={particlesInit}
@@ -106,7 +106,7 @@ function App() {
             },
             move: {
               enable: true,
-              speed: 0.8,
+              speed: 2, // Increased from 0.8 to 2
               direction: "none",
               random: true,
               straight: false,
@@ -141,7 +141,7 @@ function App() {
 
       {/* Team Name */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/90 px-6 py-3 rounded-lg shadow-lg">
-        <h1 className="text-xl font-bold text-indigo-600">Team Name: Escape Masters</h1>
+        <h1 className="text-xl font-bold text-gray-800">Team Name: Escape Masters</h1>
       </div>
 
       {/* Selected Options Display */}
@@ -197,7 +197,7 @@ function App() {
 
           {/* Player */}
           <div className="w-24 h-24 rounded-full bg-white/90 shadow-lg flex items-center justify-center">
-            <User className="w-12 h-12 text-indigo-600" />
+            <User className="w-12 h-12 text-gray-800" />
           </div>
 
           {/* Back Option */}
@@ -206,7 +206,7 @@ function App() {
               onClick={handleGoBack}
               className="flex items-center justify-center w-16 h-16 rounded-full bg-white/90 shadow-lg hover:bg-white hover:scale-110 transition-all duration-300"
             >
-              <ArrowDown className="w-8 h-8 text-indigo-600" />
+              <ArrowDown className="w-8 h-8 text-gray-800" />
             </button>
           </div>
         </div>
