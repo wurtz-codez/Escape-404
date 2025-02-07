@@ -1,7 +1,8 @@
-import React, { useState, useCallback } from 'react';
-import { MapPin, User, ArrowDown, ArrowUp, ArrowLeft, ArrowRight } from 'lucide-react';
+import React, { useState, useCallback, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { MapPin, User, ArrowDown, ArrowUp, ArrowLeft, ArrowRight, X, LogOut } from 'lucide-react';
 import { loadSlim } from "tsparticles-slim";
-import type { Container, Engine } from "tsparticles-engine";
+import type { Engine } from "tsparticles-engine";
 import Particles from "react-tsparticles";
 import GameOption from './components/GameOption';
 import QuestionModal from './components/QuestionModal';
@@ -9,12 +10,19 @@ import ContentModal from './components/ContentModal';
 import SelectedOptions from './components/SelectedOptions';
 import LivesDisplay from './components/LivesDisplay';
 import AlertModal from './components/AlertModal';
+import ProfileModal from './components/ProfileModal';
+import LogoutModal from './components/LogoutModal';
+import LandingPage from './components/LandingPage';
+import RegisterPage from './components/RegisterPage';
+import LoginPage from './components/LoginPage';
 import { questions } from './data/questions';
 import { generateContent } from './data/content';
 
-function App() {
+function GameComponent() {
   const [showQuestion, setShowQuestion] = useState(false);
   const [showContent, setShowContent] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [moves, setMoves] = useState<string[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
@@ -23,6 +31,14 @@ function App() {
   const [lives, setLives] = useState(3);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
+  const [teamName, setTeamName] = useState('');
+
+  useEffect(() => {
+    const currentTeam = localStorage.getItem('currentTeam');
+    if (currentTeam) {
+      setTeamName(currentTeam);
+    }
+  }, []);
 
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadSlim(engine);
@@ -91,14 +107,10 @@ function App() {
         id="tsparticles"
         init={particlesInit}
         options={{
-          background: {
-            opacity: 0
-          },
+          background: { opacity: 0 },
           fpsLimit: 120,
           particles: {
-            color: {
-              value: "#ffffff"
-            },
+            color: { value: "#ffffff" },
             links: {
               enable: true,
               color: "#ffffff",
@@ -106,49 +118,46 @@ function App() {
             },
             move: {
               enable: true,
-              speed: 2, // Increased from 0.8 to 2
+              speed: 2,
               direction: "none",
               random: true,
               straight: false,
-              outModes: {
-                default: "bounce"
-              }
+              outModes: { default: "bounce" }
             },
             number: {
               value: 80,
-              density: {
-                enable: true,
-                area: 800
-              }
+              density: { enable: true, area: 800 }
             },
-            size: {
-              value: { min: 1, max: 2 }
-            },
-            opacity: {
-              value: { min: 0.1, max: 0.3 }
-            }
+            size: { value: { min: 1, max: 2 } },
+            opacity: { value: { min: 0.1, max: 0.3 } }
           }
         }}
       />
 
       {/* Map Section */}
-      <div className="absolute top-4 left-4 w-64 h-64 bg-white/90 rounded-lg shadow-lg p-2">
+      <div className="absolute top-4 left-4 w-48 h-48 bg-white/90 rounded-lg shadow-lg p-2">
         <div className="w-full h-full bg-gray-200 rounded flex items-center justify-center">
-          <MapPin className="w-8 h-8 text-gray-400" />
-          <span className="ml-2">Map will be loaded here</span>
+          <MapPin className="w-6 h-6 text-gray-400" />
+          <span className="ml-2 text-sm">Map will be loaded here</span>
         </div>
       </div>
 
       {/* Team Name */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-white/90 px-6 py-3 rounded-lg shadow-lg">
-        <h1 className="text-xl font-bold text-gray-800">Team Name: Escape Masters</h1>
+        <h1 className="text-xl font-bold text-gray-800">Team: {teamName}</h1>
       </div>
 
-      {/* Selected Options Display */}
       <SelectedOptions moves={moves} />
-
-      {/* Lives Display */}
       <LivesDisplay lives={lives} />
+
+      {/* Logout Button */}
+      <button
+        onClick={() => setShowLogoutConfirm(true)}
+        className="absolute bottom-4 left-4 flex items-center space-x-2 px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-300"
+      >
+        <LogOut className="w-5 h-5" />
+        <span>Logout</span>
+      </button>
 
       {/* Main Game Area */}
       <div className="min-h-screen flex items-center justify-center">
@@ -196,9 +205,12 @@ function App() {
           </div>
 
           {/* Player */}
-          <div className="w-24 h-24 rounded-full bg-white/90 shadow-lg flex items-center justify-center">
+          <button
+            onClick={() => setShowProfile(true)}
+            className="w-24 h-24 rounded-full bg-white/90 shadow-lg flex items-center justify-center hover:bg-white transition-all duration-300"
+          >
             <User className="w-12 h-12 text-gray-800" />
-          </div>
+          </button>
 
           {/* Back Option */}
           <div className="absolute -bottom-32 left-1/2 -translate-x-1/2">
@@ -238,7 +250,29 @@ function App() {
         message={alertMessage}
         onClose={() => setShowAlert(false)}
       />
+
+      {/* Profile Modal */}
+      <ProfileModal isOpen={showProfile} onClose={() => setShowProfile(false)} />
+
+      <LogoutModal 
+        isOpen={showLogoutConfirm} 
+        onClose={() => setShowLogoutConfirm(false)} 
+      />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/game" element={<GameComponent />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
 }
 
