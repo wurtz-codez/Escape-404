@@ -1,8 +1,8 @@
 import React from 'react';
-import { HelpCircle, Puzzle as PuzzlePiece, BookOpen } from 'lucide-react';
+import { HelpCircle, Puzzle as PuzzlePiece, BookOpen, Pencil } from 'lucide-react';
 
 interface GameOptionProps {
-  type: 'question' | 'puzzle' | 'book';
+  type: 'question' | 'puzzle' | 'book' | 'pencil';
   onClick: () => void;
 }
 
@@ -15,6 +15,8 @@ const GameOption: React.FC<GameOptionProps> = ({ type, onClick }) => {
         return <PuzzlePiece className="w-10 h-10" />;
       case 'book':
         return <BookOpen className="w-10 h-10" />;
+      case 'pencil':
+        return <Pencil className="w-10 h-10" />;
     }
   };
 
