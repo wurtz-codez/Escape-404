@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { ArrowUp, ArrowLeft, ArrowRight, Pencil, Undo } from 'lucide-react';
+import { ArrowUp, ArrowLeft, ArrowRight, ArrowDown, Undo } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { undoLastMove } from '../store/gameSlice';
 
@@ -16,7 +16,7 @@ const getArrowIcon = (move: string) => {
     case 'book':
       return <ArrowRight className="w-6 h-6 text-indigo-600" />;
     case 'pencil':
-      return <Pencil className="w-6 h-6 text-indigo-600" />;
+      return <ArrowDown className="w-6 h-6 text-indigo-600" />;
     default:
       return null;
   }
@@ -71,4 +71,4 @@ const SelectedOptions: React.FC<SelectedOptionsProps> = ({ moves }) => {
   );
 };
 
-export default SelectedOptions;
+export default SelectedOptions

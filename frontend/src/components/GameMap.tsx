@@ -13,25 +13,27 @@ const GameMap: React.FC = () => {
   } = useSelector((state: RootState) => state.game);
 
   return (
-    <div className="w-48 h-48 bg-white/90 rounded-lg shadow-lg p-2">
-      <div className="w-full h-full bg-gray-100 rounded grid grid-cols-6 grid-rows-6 gap-0.5">
+    <div className="w-64 h-64 bg-white/70 rounded-lg shadow-lg p-2">
+      <div className="w-full h-full bg-gray-100/20 rounded grid grid-cols-10 grid-rows-10 gap-0.5">
         {visitedCells.map((row, y) => (
           row.map((visited, x) => {
             const isStart = x === startPosition.x && y === startPosition.y;
             const isExit = x === exitPosition.x && y === exitPosition.y;
             const isBlocked = blockedCells[y][x];
             const isPlayer = x === playerPosition.x && y === playerPosition.y;
+            const shouldHighlight = isStart || isExit || isBlocked || visited;
 
             return (
               <div
                 key={`${x}-${y}`}
                 className={`
                   relative
+                  transition-all duration-300
+                  ${shouldHighlight ? 'bg-opacity-100' : 'bg-opacity-20'}
                   ${visited ? 'bg-indigo-200' : 'bg-gray-300'}
                   ${isStart ? 'bg-blue-300' : ''}
                   ${isExit ? 'bg-green-300' : ''}
                   ${isBlocked ? 'bg-red-400' : ''}
-                  transition-all duration-300
                 `}
               >
                 {isPlayer && (
@@ -39,17 +41,17 @@ const GameMap: React.FC = () => {
                     className="absolute inset-0 flex items-center justify-center transform"
                     style={{ transform: `rotate(${playerPosition.rotation}deg)` }}
                   >
-                    <ArrowUp className="w-4 h-4 text-indigo-600" />
+                    <ArrowUp className="w-3 h-3 text-indigo-600" />
                   </div>
                 )}
                 {isStart && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-[8px] font-bold text-blue-700">START</span>
+                    <span className="text-[6px] font-bold text-blue-700">START</span>
                   </div>
                 )}
                 {isExit && (
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-[8px] font-bold text-green-700">END</span>
+                    <span className="text-[6px] font-bold text-green-700">END</span>
                   </div>
                 )}
               </div>

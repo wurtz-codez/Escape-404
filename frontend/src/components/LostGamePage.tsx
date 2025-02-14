@@ -1,19 +1,20 @@
 import React, { useCallback } from 'react';
+import { XOctagon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Code2 } from 'lucide-react';
 import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
 import type { Engine } from "tsparticles-engine";
 
-const LandingPage = () => {
+const LostGamePage = () => {
   const navigate = useNavigate();
+  const teamName = localStorage.getItem('currentTeam') || 'Team';
 
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadSlim(engine);
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-800 to-gray-900 flex flex-col items-center justify-center relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-800 to-gray-900 flex items-center justify-center relative overflow-hidden">
       <Particles
         id="tsparticles"
         init={particlesInit}
@@ -50,27 +51,30 @@ const LandingPage = () => {
         }}
       />
       
-      <div className="relative z-10">
-        <div className="mb-8">
-          <Code2 className="w-24 h-24 text-white" />
+      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-8 max-w-md w-full mx-4 text-center relative z-10">
+        <div className="flex justify-center mb-6">
+          <XOctagon className="w-20 h-20 text-red-400" />
         </div>
-        
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-white mb-2">Eureka Club</h1>
-          <h2 className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-400">
-            ESCAPE-404
-          </h2>
+        <h1 className="text-4xl font-bold text-white mb-4">
+          Your journey has ended
+        </h1>
+        <div className="space-y-4 mb-8">
+          <p className="text-xl text-gray-300">
+            {teamName}
+          </p>
+          <p className="text-lg text-white">
+            Thank you for playing the game.
+          </p>
         </div>
-
         <button
-          onClick={() => navigate('/game')}
-          className="w-64 px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-all duration-300 border border-white/20"
+          onClick={() => navigate('/')}
+          className="px-8 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all duration-300"
         >
-          Start Game
+          Back to Home
         </button>
       </div>
     </div>
   );
 };
 
-export default LandingPage
+export default LostGamePage;

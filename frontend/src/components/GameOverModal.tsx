@@ -1,11 +1,11 @@
 import React from 'react';
-import { Trophy } from 'lucide-react';
+import { XCircle } from 'lucide-react';
 
-interface WinModalProps {
+interface GameOverModalProps {
   isOpen: boolean;
 }
 
-const WinModal: React.FC<WinModalProps> = ({ isOpen }) => {
+const GameOverModal: React.FC<GameOverModalProps> = ({ isOpen }) => {
   if (!isOpen) return null;
 
   return (
@@ -13,11 +13,11 @@ const WinModal: React.FC<WinModalProps> = ({ isOpen }) => {
       <div className="bg-white rounded-lg p-8 max-w-sm w-full mx-4">
         <div className="text-center">
           <div className="flex justify-center mb-4">
-            <Trophy className="w-16 h-16 text-yellow-500" />
+            <XCircle className="w-16 h-16 text-red-500" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Congratulations!</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Game Over</h2>
           <p className="text-gray-600">
-            You've successfully completed the game!
+            You have used your 3 lives, can't play anymore.
           </p>
         </div>
       </div>
@@ -25,4 +25,4 @@ const WinModal: React.FC<WinModalProps> = ({ isOpen }) => {
   );
 };
 
-export default WinModal;
+export default GameOverModal

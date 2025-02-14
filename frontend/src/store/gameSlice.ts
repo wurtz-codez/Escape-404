@@ -16,55 +16,85 @@ export interface GameState {
   visitedCells: boolean[][];
   blockedCells: boolean[][];
   hasWon: boolean;
+  gameTime: number;
+  isGameOver: boolean;
 }
 
-const getRandomCorner = () => {
-  const corners = [
-    { x: 0, y: 0 },
-    { x: 5, y: 0 },
-    { x: 0, y: 5 },
-    { x: 5, y: 5 }
-  ];
-  return corners[Math.floor(Math.random() * corners.length)];
-};
-
-const generateBlockedCells = (start: Position, exit: Position) => {
-  const blocked = Array(6).fill(null).map(() => Array(6).fill(false));
+const initializeGame = () => {
+  // Fixed start and end positions
+  const start = { x: 0, y: 9 }; // Bottom left
+  const exit = { x: 9, y: 0 }; // Top right
   
-  for (let i = 0; i < 8; i++) {
-    let x = Math.floor(Math.random() * 6);
-    let y = Math.floor(Math.random() * 6);
+  // Initialize the blocked cells
+  const blocked = Array(10).fill(null).map(() => Array(10).fill(false));
+  
+  // Add random blocked cells, avoiding start/end positions and their adjacent cells
+  const protectedCells = [
+    // Start position and adjacent cells
+    [0, 9], [0, 8], [1, 9], [1, 8],
+    // End position and adjacent cells
+    [9, 0], [8, 0], [9, 1], [8, 1]
+  ];
+
+  const isValidBlockedPosition = (x: number, y: number): boolean => {
+    // Check if position is protected
+    if (protectedCells.some(([px, py]) => px === x && py === y)) {
+      return false;
+    }
+
+    // Check adjacent cells (including diagonals)
+    for (let dx = -1; dx <= 1; dx++) {
+      for (let dy = -1; dy <= 1; dy++) {
+        const newX = x + dx;
+        const newY = y + dy;
+        
+        // Skip checking the cell itself
+        if (dx === 0 && dy === 0) continue;
+        
+        // Check if adjacent cell is within bounds and blocked
+        if (
+          newX >= 0 && newX < 10 &&
+          newY >= 0 && newY < 10 &&
+          blocked[newY][newX]
+        ) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  };
+
+  // Add blocked cells with spacing
+  let attempts = 0;
+  let blockedCount = 0;
+  const maxBlocked = 15; // Reduced from 20 to ensure better spacing
+  const maxAttempts = 1000; // Prevent infinite loop
+
+  while (blockedCount < maxBlocked && attempts < maxAttempts) {
+    const x = Math.floor(Math.random() * 10);
+    const y = Math.floor(Math.random() * 10);
     
-    while ((x === start.x && y === start.y) || 
-           (x === exit.x && y === exit.y)) {
-      x = Math.floor(Math.random() * 6);
-      y = Math.floor(Math.random() * 6);
+    if (isValidBlockedPosition(x, y)) {
+      blocked[y][x] = true;
+      blockedCount++;
     }
     
-    blocked[y][x] = true;
-  }
-  
-  return blocked;
-};
-
-const initializeGame = () => {
-  const start = getRandomCorner();
-  let exit = getRandomCorner();
-  
-  while (exit.x === start.x && exit.y === start.y) {
-    exit = getRandomCorner();
+    attempts++;
   }
   
   return {
     startPosition: { ...start, rotation: 0 },
     exitPosition: { ...exit, rotation: 0 },
     playerPosition: { ...start, rotation: 0 },
-    blockedCells: generateBlockedCells(start, exit),
-    visitedCells: Array(6).fill(null).map(() => Array(6).fill(false)),
+    blockedCells: blocked,
+    visitedCells: Array(10).fill(null).map(() => Array(10).fill(false)),
     lives: 3,
     moves: [],
     availableMoves: [],
-    hasWon: false
+    hasWon: false,
+    gameTime: 0,
+    isGameOver: false
   };
 };
 
@@ -85,44 +115,27 @@ const gameSlice = createSlice({
     },
     reduceLives: (state) => {
       state.lives = Math.max(0, state.lives - 1);
+      if (state.lives === 0) {
+        state.isGameOver = true;
+      }
     },
     addMove: (state, action: PayloadAction<string>) => {
       state.moves.push(action.payload);
     },
+    updateGameTime: (state, action: PayloadAction<number>) => {
+      state.gameTime = action.payload;
+    },
+    resetGameTime: (state) => {
+      state.gameTime = 0;
+    },
     setAvailableMoves: (state, action: PayloadAction<string[]>) => {
-      // Filter out moves that would result in backtracking
-      const currentPos = state.playerPosition;
-      const filteredMoves = action.payload.filter(move => {
-        let newX = currentPos.x;
-        let newY = currentPos.y;
-        
-        switch (move) {
-          case 'question': // up
-            newY--;
-            break;
-          case 'puzzle': // left
-            newX--;
-            break;
-          case 'book': // right
-            newX++;
-            break;
-          case 'pencil': // down
-            newY++;
-            break;
-        }
-        
-        // Check if this move would lead to a previously visited cell
-        return !state.visitedCells[newY]?.[newX];
-      });
-      
-      state.availableMoves = filteredMoves;
+      state.availableMoves = action.payload;
     },
     undoLastMove: (state) => {
       if (state.moves.length > 0) {
         const lastMove = state.moves[state.moves.length - 1];
         state.moves.pop();
         
-        // Update player position based on the undone move
         const newPos = { ...state.playerPosition };
         switch (lastMove) {
           case 'question':
@@ -157,7 +170,9 @@ export const {
   addMove, 
   setAvailableMoves, 
   undoLastMove,
-  resetGame 
+  resetGame,
+  updateGameTime,
+  resetGameTime
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import { User, ArrowDown, ArrowUp, ArrowLeft, ArrowRight } from 'lucide-react';
 import { RootState } from '../store/store';
-import { movePlayer, reduceLives, addMove, setAvailableMoves } from '../store/gameSlice';
+import { movePlayer, reduceLives, addMove, setAvailableMoves, updateGameTime, resetGameTime } from '../store/gameSlice';
 import { questions } from '../data/questions';
 import { generateContent } from '../data/content';
 import GameMap from './GameMap';
@@ -13,8 +14,11 @@ import SelectedOptions from './SelectedOptions';
 import LivesDisplay from './LivesDisplay';
 import AlertModal from './AlertModal';
 import WinModal from './WinModal';
+import Timer from './Timer';
+import GameOverModal from './GameOverModal';
 
 const GameComponent: React.FC = () => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { 
     playerPosition, 
@@ -22,7 +26,10 @@ const GameComponent: React.FC = () => {
     moves, 
     availableMoves, 
     blockedCells,
-    hasWon 
+    hasWon,
+    isGameOver,
+    gameTime,
+    exitPosition
   } = useSelector((state: RootState) => state.game);
   
   const [showQuestion, setShowQuestion] = useState(false);
@@ -32,26 +39,81 @@ const GameComponent: React.FC = () => {
   const [selectedOptionType, setSelectedOptionType] = useState<string | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
+  const [timerStarted, setTimerStarted] = useState(false);
+
+  // Start timer when component mounts
+  useEffect(() => {
+    dispatch(resetGameTime());
+    setTimerStarted(true);
+  }, []);
+
+  // Handle timer
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+
+    if (timerStarted && !hasWon && !isGameOver) {
+      timer = setInterval(() => {
+        dispatch(updateGameTime(gameTime + 1));
+      }, 1000);
+    }
+
+    return () => {
+      if (timer) {
+        clearInterval(timer);
+      }
+    };
+  }, [timerStarted, hasWon, isGameOver, gameTime]);
 
   useEffect(() => {
     updateAvailableMoves();
   }, [playerPosition, blockedCells]);
 
+  useEffect(() => {
+    if (isGameOver) {
+      setTimerStarted(false);
+      setTimeout(() => {
+        navigate('/lost-game');
+      }, 2000);
+    }
+  }, [isGameOver]);
+
+  useEffect(() => {
+    if (hasWon) {
+      setTimerStarted(false);
+      localStorage.setItem('completionTime', gameTime.toString());
+      setTimeout(() => {
+        navigate('/completion');
+      }, 2000);
+    }
+  }, [hasWon]);
+
   const isValidMove = (type: string): boolean => {
     const { x, y } = playerPosition;
+    let newX = x;
+    let newY = y;
     
     switch (type) {
       case 'question':
-        return y > 0 && !blockedCells[y-1][x]; // Up
+        newY = y - 1;
+        break;
       case 'puzzle':
-        return x > 0 && !blockedCells[y][x-1]; // Left
+        newX = x - 1;
+        break;
       case 'book':
-        return x < 5 && !blockedCells[y][x+1]; // Right
+        newX = x + 1;
+        break;
       case 'pencil':
-        return y < 5 && !blockedCells[y+1][x]; // Down
-      default:
-        return false;
+        newY = y + 1;
+        break;
     }
+    
+    return (
+      newX >= 0 && 
+      newX < 10 && 
+      newY >= 0 && 
+      newY < 10 && 
+      !blockedCells[newY][newX]
+    );
   };
 
   const updateAvailableMoves = () => {
@@ -136,6 +198,7 @@ const GameComponent: React.FC = () => {
 
       <SelectedOptions moves={moves} />
       <LivesDisplay lives={lives} />
+      <Timer time={gameTime} />
 
       <div className="min-h-screen flex items-center justify-center">
         <div className="relative">
@@ -219,6 +282,7 @@ const GameComponent: React.FC = () => {
       />
 
       <WinModal isOpen={hasWon} />
+      <GameOverModal isOpen={isGameOver} />
     </div>
   );
 };
