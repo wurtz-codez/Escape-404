@@ -71,6 +71,27 @@ const LandingPage = () => {
           </button>
         </div>
       </div>
+
+      <div className="absolute bottom-4 left-4 text-lg bg-black/40 p-4 rounded-lg backdrop-blur-sm">
+        <ul className="text-white">
+          <li className="font-semibold mb-2">Developers:</li>
+          <li className="ml-4">
+            <a href="https://github.com/wurtz-codez" target="_blank" rel="noopener noreferrer" className="hover:underline">
+              Koustubh Pande
+            </a>
+          </li>
+          <li className="ml-4">
+            <a href="https://github.com/Asceptic07" target="_blank" rel="noopener noreferrer" className="hover:underline">
+              Swanik Srivastava
+            </a>
+          </li>
+        </ul>
+      </div>
+      
+      <footer className="absolute bottom-4 right-4 text-white p-4 rounded-lg backdrop-blur-sm">
+        <p className="font-bold">2025 © All rights reserved by Eureka Club</p>
+      </footer>
+
     </div>
   );
 };

@@ -283,7 +283,13 @@ const GameComponent: React.FC = () => {
 
       <WinModal isOpen={hasWon} />
       <GameOverModal isOpen={isGameOver} />
+
+      <footer className="absolute bottom-4 w-full text-center text-white">
+        <p>2025 © All rights reserved by Eureka Club</p>
+      </footer>
+      
     </div>
+    
   );
 };
 
