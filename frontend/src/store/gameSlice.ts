@@ -68,8 +68,9 @@ const initializeGame = () => {
   // Add blocked cells with spacing
   let attempts = 0;
   let blockedCount = 0;
-  const maxBlocked = 15; // Reduced from 20 to ensure better spacing
-  const maxAttempts = 1000; // Prevent infinite loop
+  const minBlocked = 16; // Minimum required blocked cells
+  const maxBlocked = 20; // Maximum blocked cells
+  const maxAttempts = 2000; // Increased max attempts to ensure minimum is reached
 
   while (blockedCount < maxBlocked && attempts < maxAttempts) {
     const x = Math.floor(Math.random() * 10);
@@ -81,6 +82,31 @@ const initializeGame = () => {
     }
     
     attempts++;
+
+    // If we've made many attempts but haven't reached minimum, reset and try again
+    if (attempts === maxAttempts && blockedCount < minBlocked) {
+      attempts = 0;
+      blockedCount = 0;
+      // Reset the blocked array
+      for (let i = 0; i < 10; i++) {
+        for (let j = 0; j < 10; j++) {
+          blocked[i][j] = false;
+        }
+      }
+    }
+  }
+  
+  // If we still haven't reached minimum blocked cells, try one more time with a different strategy
+  if (blockedCount < minBlocked) {
+    // Try placing blocks in a more systematic way
+    for (let y = 2; y < 8; y += 2) {
+      for (let x = 2; x < 8; x += 2) {
+        if (blockedCount < minBlocked && isValidBlockedPosition(x, y)) {
+          blocked[y][x] = true;
+          blockedCount++;
+        }
+      }
+    }
   }
   
   return {
