@@ -18,6 +18,8 @@ export interface GameState {
   hasWon: boolean;
   gameTime: number;
   isGameOver: boolean;
+  points: number;
+  livesLost: number;
 }
 
 const initializeGame = () => {
@@ -120,7 +122,9 @@ const initializeGame = () => {
     availableMoves: [],
     hasWon: false,
     gameTime: 0,
-    isGameOver: false
+    isGameOver: false,
+    points: 0,
+    livesLost: 0,
   };
 };
 
@@ -140,7 +144,10 @@ const gameSlice = createSlice({
       }
     },
     reduceLives: (state) => {
-      state.lives = Math.max(0, state.lives - 1);
+      if (state.lives > 0) {
+        state.lives -= 1;
+        state.livesLost += 1;
+      }
       if (state.lives === 0) {
         state.isGameOver = true;
       }
@@ -187,6 +194,9 @@ const gameSlice = createSlice({
       }
     },
     resetGame: () => initializeGame(),
+    addPoints: (state, action: PayloadAction<number>) => {
+      state.points += action.payload;
+    },
   },
 });
 
@@ -198,7 +208,8 @@ export const {
   undoLastMove,
   resetGame,
   updateGameTime,
-  resetGameTime
+  resetGameTime,
+  addPoints
 } = gameSlice.actions;
 
 export default gameSlice.reducer;

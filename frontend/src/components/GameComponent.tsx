@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { User, ArrowDown, ArrowUp, ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowLeft, ArrowRight } from 'lucide-react';
 import { RootState } from '../store/store';
-import { movePlayer, reduceLives, addMove, setAvailableMoves, updateGameTime, resetGameTime } from '../store/gameSlice';
+import { movePlayer, reduceLives, addMove, setAvailableMoves, updateGameTime, resetGameTime, addPoints } from '../store/gameSlice';
 import { questions } from '../data/questions';
 import { generateContent } from '../data/content';
 import GameMap from './GameMap';
@@ -29,7 +29,9 @@ const GameComponent: React.FC = () => {
     hasWon,
     isGameOver,
     gameTime,
-    exitPosition
+    exitPosition,
+    points,
+    livesLost
   } = useSelector((state: RootState) => state.game);
   
   const [showQuestion, setShowQuestion] = useState(false);
@@ -40,6 +42,9 @@ const GameComponent: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [timerStarted, setTimerStarted] = useState(false);
+  const [taskStartTime, setTaskStartTime] = useState<number>(0);
+
+  const userImage = localStorage.getItem('userImage');
 
   // Start timer when component mounts
   useEffect(() => {
@@ -80,7 +85,10 @@ const GameComponent: React.FC = () => {
   useEffect(() => {
     if (hasWon) {
       setTimerStarted(false);
-      localStorage.setItem('completionTime', gameTime.toString());
+      // Calculate final time with points and penalties, allowing negative values
+      const finalTime = gameTime - (points * 2) + (livesLost * 10);
+      localStorage.setItem('completionTime', finalTime.toString());
+      localStorage.setItem('pointsScored', points.toString());
       setTimeout(() => {
         navigate('/completion');
       }, 2000);
@@ -134,6 +142,35 @@ const GameComponent: React.FC = () => {
     );
   };
 
+  const calculatePoints = (type: string, timeTaken: number) => {
+    // Base points for each type
+    const basePoints = {
+      'question': 3,
+      'puzzle': 8,
+      'book': 12,
+      'pencil': 10
+    };
+
+    // Time thresholds in seconds
+    const timeThresholds = {
+      'question': 30,
+      'puzzle': 45,
+      'book': 75,
+      'pencil': 60
+    };
+
+    const basePoint = basePoints[type as keyof typeof basePoints] || 0;
+    const threshold = timeThresholds[type as keyof typeof timeThresholds] || 30;
+
+    // Calculate bonus points based on time taken
+    let timeBonus = 0;
+    if (timeTaken < threshold) {
+      timeBonus = Math.floor((threshold - timeTaken) / 5); // 1 bonus point per 5 seconds under threshold
+    }
+
+    return basePoint + timeBonus;
+  };
+
   const handleOptionClick = (type: string) => {
     if (!isValidMove(type)) {
       setAlertMessage('This path is blocked!');
@@ -143,6 +180,8 @@ const GameComponent: React.FC = () => {
 
     if (availableMoves.includes(type)) {
       setSelectedOptionType(type);
+      setTaskStartTime(Date.now());
+      
       if (type === 'question') {
         setShowQuestion(true);
       } else {
@@ -152,8 +191,11 @@ const GameComponent: React.FC = () => {
   };
 
   const handleAnswerSubmit = (isCorrect: boolean) => {
+    const timeTaken = Math.floor((Date.now() - taskStartTime) / 1000);
+    
     if (isCorrect && selectedOptionType) {
-      dispatch(addMove(selectedOptionType));
+      const earnedPoints = calculatePoints(selectedOptionType, timeTaken);
+      dispatch(addPoints(earnedPoints));
       const newPosition = { ...playerPosition };
 
       switch (selectedOptionType) {
@@ -182,7 +224,7 @@ const GameComponent: React.FC = () => {
       dispatch(movePlayer(newPosition));
     } else {
       dispatch(reduceLives());
-      setAlertMessage('Wrong answer! You lost a life!');
+      setAlertMessage(`Wrong answer! You lost a life! +10 seconds penalty`);
       setShowAlert(true);
     }
     setShowQuestion(false);
@@ -249,10 +291,20 @@ const GameComponent: React.FC = () => {
           )}
 
           <div 
-            className="w-24 h-24 rounded-full bg-white/90 shadow-lg flex items-center justify-center"
+            className="w-24 h-24 rounded-full bg-white/90 shadow-lg flex items-center justify-center overflow-hidden"
             style={{ transform: `rotate(${playerPosition.rotation}deg)` }}
           >
-            <User className="w-12 h-12 text-gray-800" />
+            {userImage ? (
+              <img 
+                src={userImage} 
+                alt="Profile" 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+                <span className="text-gray-600 text-xl">?</span>
+              </div>
+            )}
           </div>
         </div>
       </div>

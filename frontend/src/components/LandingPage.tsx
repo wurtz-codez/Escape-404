@@ -76,6 +76,11 @@ const LandingPage = () => {
         <ul className="text-white">
           <li className="font-semibold mb-2">Developers:</li>
           <li className="ml-4">
+            <a href="https://github.com/nihalawasthi" target="_blank" rel="noopener noreferrer" className="hover:underline">
+              Nihal Awasthi
+            </a>
+          </li>
+          <li className="ml-4">
             <a href="https://github.com/wurtz-codez" target="_blank" rel="noopener noreferrer" className="hover:underline">
               Koustubh Pande
             </a>
