@@ -4,6 +4,7 @@ import Particles from "react-tsparticles";
 import { loadSlim } from "tsparticles-slim";
 import type { Engine } from "tsparticles-engine";
 import Logo from '../images/Logo.png';
+import '../effects/typewriter.css'; // Import the typewriter CSS
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -57,9 +58,9 @@ const LandingPage = () => {
         
         <div className="mb-12 flex flex-col items-center">
           <h1 className="text-4xl font-bold text-white mb-2">Eureka Club</h1>
-          <h2 className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-400">
+          <div className="text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-gray-200 to-gray-400 typewriter-box">
             ESCAPE-404
-          </h2>
+          </div>
         </div>
 
         <div className="flex justify-center">
@@ -101,4 +102,4 @@ const LandingPage = () => {
   );
 };
 
-export default LandingPage
+export default LandingPage;

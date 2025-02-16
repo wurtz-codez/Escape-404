@@ -169,26 +169,48 @@ const gameSlice = createSlice({
         const lastMove = state.moves[state.moves.length - 1];
         state.moves.pop();
         
-        const newPos = { ...state.playerPosition };
+        // Update position based on the reverse of the last move
         switch (lastMove) {
-          case 'question':
-            newPos.y += 1;
-            newPos.rotation = 0;
+          case 'down': // was moving down
+            state.playerPosition.y -= 1;
+            state.playerPosition.rotation = 0;
             break;
-          case 'puzzle':
-            newPos.x += 1;
-            newPos.rotation = 90;
+          case 'right': // was moving right
+            state.playerPosition.x -= 1;
+            state.playerPosition.rotation = 90;
             break;
-          case 'book':
-            newPos.x -= 1;
-            newPos.rotation = 270;
+          case 'left': // was moving left
+            state.playerPosition.x += 1;
+            state.playerPosition.rotation = 270;
             break;
-          case 'pencil':
-            newPos.y -= 1;
-            newPos.rotation = 180;
+          case 'up': // was moving up
+            state.playerPosition.y += 1;
+            state.playerPosition.rotation = 180;
             break;
         }
-        state.playerPosition = newPos;
+
+        // Recalculate available moves at the new position
+        const possibleMoves = [];
+        const { x, y } = state.playerPosition;
+
+        // Check up
+        if (y > 0 && !state.blockedCells[y-1][x]) {
+          possibleMoves.push('up');
+        }
+        // Check right
+        if (x < 9 && !state.blockedCells[y][x+1]) {
+          possibleMoves.push('right');
+        }
+        // Check down
+        if (y < 9 && !state.blockedCells[y+1][x]) {
+          possibleMoves.push('down');
+        }
+        // Check left
+        if (x > 0 && !state.blockedCells[y][x-1]) {
+          possibleMoves.push('left');
+        }
+
+        state.availableMoves = possibleMoves;
         state.visitedCells[state.playerPosition.y][state.playerPosition.x] = false;
         state.hasWon = false;
       }

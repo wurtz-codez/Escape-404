@@ -9,13 +9,13 @@ interface SelectedOptionsProps {
 
 const getArrowIcon = (move: string) => {
   switch (move) {
-    case 'question':
+    case 'up':
       return <ArrowUp className="w-6 h-6 text-indigo-600" />;
-    case 'puzzle':
+    case 'left':
       return <ArrowLeft className="w-6 h-6 text-indigo-600" />;
-    case 'book':
+    case 'right':
       return <ArrowRight className="w-6 h-6 text-indigo-600" />;
-    case 'pencil':
+    case 'down':
       return <ArrowDown className="w-6 h-6 text-indigo-600" />;
     default:
       return null;
@@ -71,4 +71,4 @@ const SelectedOptions: React.FC<SelectedOptionsProps> = ({ moves }) => {
   );
 };
 
-export default SelectedOptions
+export default SelectedOptions;
