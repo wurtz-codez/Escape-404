@@ -27,7 +27,7 @@ const LoginPage: React.FC<LoginProps> = ({ loginUser }) => {
       toast.success("Logged in successfully");
       setEmail("");
       setPassword("");
-      navigate("/");
+      navigate("/landing");
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Login failed";
       toast.error(errorMessage);

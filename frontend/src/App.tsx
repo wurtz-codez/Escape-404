@@ -34,8 +34,8 @@ const App: React.FC = () => {
     <Provider store={store}>
       <Router>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage loginUser={loginUser} />} />
+          <Route path="/" element={<LoginPage loginUser={loginUser} />} />
+          <Route path="/landing" element={<LandingPage />} />
           <Route path="/game" element={<GameComponent />} />
           <Route path="/completion" element={<CompletionPage />} />
           <Route path="/lost-game" element={<LostGamePage />} />
