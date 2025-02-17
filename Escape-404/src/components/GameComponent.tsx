@@ -12,18 +12,24 @@ import {
   resetGameTime,
   addPoints
 } from '../store/gameSlice';
-import { questions } from '../data/questions';
+import { questions as originalQuestions } from '../data/questions';
+import { tasks as originalTasks } from '../data/tasks';
+import { questions as originalCodingTasks } from '../data/coding_tasks';
 import { generateContent } from '../data/content';
 import GameMap from './GameMap';
 import GameOption from './GameOption';
 import QuestionModal from './QuestionModal';
 import ContentModal from './ContentModal';
+import TaskModal from './TaskModal';
+import CodingTaskModal from './CodingTaskModal';
 import SelectedOptions from './SelectedOptions';
 import LivesDisplay from './LivesDisplay';
 import AlertModal from './AlertModal';
 import WinModal from './WinModal';
 import Timer from './Timer';
 import GameOverModal from './GameOverModal';
+import BackgroundImage from '../images/bg_image.jpg'; // Import the custom background image
+import '../effects/tech-background.css'; // Import the custom tech background CSS
 
 const GameComponent: React.FC = () => {
   const navigate = useNavigate();
@@ -42,11 +48,18 @@ const GameComponent: React.FC = () => {
   
   const [showQuestion, setShowQuestion] = useState(false);
   const [showContent, setShowContent] = useState(false);
+  const [showTask, setShowTask] = useState(false);
+  const [showCodingTask, setShowCodingTask] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [selectedOptionType, setSelectedOptionType] = useState<string | null>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
+  const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
+  const [currentCodingTaskIndex, setCurrentCodingTaskIndex] = useState(0);
+  const [shuffledQuestions, setShuffledQuestions] = useState(originalQuestions);
+  const [shuffledTasks, setShuffledTasks] = useState(originalTasks);
+  const [shuffledCodingTasks, setShuffledCodingTasks] = useState(originalCodingTasks);
   const [timerStarted, setTimerStarted] = useState(false);
   const [taskStartTime, setTaskStartTime] = useState<number>(0);
 
@@ -83,6 +96,9 @@ const GameComponent: React.FC = () => {
   useEffect(() => {
     dispatch(resetGameTime());
     setTimerStarted(true);
+    shuffleQuestions();
+    shuffleTasks();
+    shuffleCodingTasks();
   }, []);
 
   // Handle timer
@@ -184,19 +200,38 @@ const GameComponent: React.FC = () => {
     setTaskStartTime(Date.now());
     if (type === 'question') {
       setShowQuestion(true);
+    } else if (type === 'pencil') {
+      setShowTask(true);
+    } else if (type === 'book') {
+      setShowCodingTask(true);
     } else {
       setShowContent(true);
     }
   };
 
   // Helper: Shuffle an array (Fisher–Yates shuffle)
-  const shuffleArray = (array: string[]) => {
+  const shuffleArray = (array: any[]) => {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
+  };
+
+  // Shuffle questions array
+  const shuffleQuestions = () => {
+    setShuffledQuestions(shuffleArray(originalQuestions));
+  };
+
+  // Shuffle tasks array
+  const shuffleTasks = () => {
+    setShuffledTasks(shuffleArray(originalTasks));
+  };
+
+  // Shuffle coding tasks array
+  const shuffleCodingTasks = () => {
+    setShuffledCodingTasks(shuffleArray(originalCodingTasks));
   };
 
   // Shuffle iconPositions ensuring that options are remapped.
@@ -219,6 +254,11 @@ const GameComponent: React.FC = () => {
     setIconPositions(updatedMapping);
   };
 
+  // Add this new helper function
+  const getRandomIndex = (arrayLength: number) => {
+    return Math.floor(Math.random() * arrayLength);
+  };
+
   const handleAnswerSubmit = (isCorrect: boolean) => {
     const timeTaken = Math.floor((Date.now() - taskStartTime) / 1000);
     const newPosition = { ...playerPosition };
@@ -237,6 +277,10 @@ const GameComponent: React.FC = () => {
       // Update indices for questions or content.
       if (selectedOptionType === 'question') {
         setCurrentQuestionIndex(prev => prev + 1);
+      } else if (selectedOptionType === 'pencil') {
+        setCurrentTaskIndex(prev => prev + 1);
+      } else if (selectedOptionType === 'book') {
+        setCurrentCodingTaskIndex(prev => prev + 1);
       } else {
         setCurrentContentIndex(prev => prev + 1);
       }
@@ -255,9 +299,22 @@ const GameComponent: React.FC = () => {
       dispatch(reduceLives());
       setAlertMessage(`Wrong answer! You lost a life! +10 seconds penalty`);
       setShowAlert(true);
+      
+      // Instead of incrementing, randomly select new indices when answer is wrong
+      if (selectedOptionType === 'question') {
+        setCurrentQuestionIndex(getRandomIndex(shuffledQuestions.length));
+      } else if (selectedOptionType === 'pencil') {
+        setCurrentTaskIndex(getRandomIndex(shuffledTasks.length));
+      } else if (selectedOptionType === 'book') {
+        setCurrentCodingTaskIndex(getRandomIndex(shuffledCodingTasks.length));
+      } else {
+        setCurrentContentIndex(getRandomIndex(shuffledQuestions.length));
+      }
     }
     setShowQuestion(false);
     setShowContent(false);
+    setShowTask(false);
+    setShowCodingTask(false);
     setSelectedOptionType(null);
 
     // Shuffle icon positions after each move.
@@ -273,9 +330,12 @@ const GameComponent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-800 to-gray-900 relative overflow-hidden">
+    <div 
+      className="min-h-screen relative overflow-hidden" 
+      style={{ backgroundImage: `url(${BackgroundImage})`, backgroundSize: 'cover' }}
+    >
       <div className="absolute top-4 left-4">
-        <GameMap />
+      <GameMap />
       </div>
 
       {/* Moves display in the top-right white box */}
@@ -285,67 +345,85 @@ const GameComponent: React.FC = () => {
       <Timer time={gameTime} />
 
       <div className="min-h-screen flex items-center justify-center">
-        <div className="relative">
-          {/* Render option icons at their dynamically assigned positions */}
-          {['question', 'puzzle', 'book', 'pencil'].map((optionKey) => {
-            if (!isValidMove(optionKey)) return null;
-            const pos = iconPositions[optionKey];
-            return (
-              <div key={optionKey} className={positionClasses[pos]}>
-                <GameOption type={optionKey} onClick={() => handleOptionClick(optionKey)} />
-              </div>
-            );
-          })}
-
-          {/* Player image */}
-          <div 
-            className="w-24 h-24 rounded-full bg-white/90 shadow-lg flex items-center justify-center overflow-hidden"
-            style={{ transform: `rotate(${playerPosition.rotation}deg)` }}
-          >
-            {userImage ? (
-              <img 
-                src={userImage} 
-                alt="Profile" 
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-300 flex items-center justify-center">
-                <span className="text-gray-600 text-xl">?</span>
-              </div>
-            )}
+      <div className="relative">
+        {/* Render option icons at their dynamically assigned positions */}
+        {['question', 'puzzle', 'book', 'pencil'].map((optionKey) => {
+        if (!isValidMove(optionKey)) return null;
+        const pos = iconPositions[optionKey];
+        return (
+          <div key={optionKey} className={positionClasses[pos]}>
+          <GameOption type={optionKey} onClick={() => handleOptionClick(optionKey)} />
           </div>
+        );
+        })}
+
+        {/* Player image */}
+        <div 
+        className="w-24 h-24 rounded-full bg-white/90 shadow-lg flex items-center justify-center overflow-hidden"
+        style={{ transform: `rotate(${playerPosition.rotation}deg)` }}
+        >
+        {userImage ? (
+          <img 
+          src={userImage} 
+          alt="Profile" 
+          className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full bg-gray-300 flex items-center justify-center">
+          <span className="text-gray-600 text-xl">?</span>
+          </div>
+        )}
         </div>
+      </div>
       </div>
 
       {showQuestion && (
-        <QuestionModal
-          isOpen={showQuestion}
-          onClose={() => setShowQuestion(false)}
-          onSubmit={handleAnswerSubmit}
-          question={questions[currentQuestionIndex % questions.length]}
-        />
+      <QuestionModal
+        isOpen={showQuestion}
+        onClose={() => setShowQuestion(false)}
+        onSubmit={handleAnswerSubmit}
+        question={shuffledQuestions[currentQuestionIndex % shuffledQuestions.length]}
+      />
       )}
 
       {showContent && selectedOptionType && selectedOptionType !== 'question' && (
-        <ContentModal
-          isOpen={showContent}
-          onClose={() => setShowContent(false)}
-          onSubmit={handleAnswerSubmit}
-          content={getCurrentContent()}
-        />
+      <ContentModal
+        isOpen={showContent}
+        onClose={() => setShowContent(false)}
+        onSubmit={handleAnswerSubmit}
+        content={getCurrentContent()}
+      />
+      )}
+
+      {showTask && (
+      <TaskModal
+        isOpen={showTask}
+        onClose={() => setShowTask(false)}
+        onSubmit={handleAnswerSubmit}
+        task={shuffledTasks[currentTaskIndex % shuffledTasks.length]}
+      />
+      )}
+
+      {showCodingTask && (
+      <CodingTaskModal
+        isOpen={showCodingTask}
+        onClose={() => setShowCodingTask(false)}
+        onSubmit={handleAnswerSubmit}
+        question={shuffledCodingTasks[currentCodingTaskIndex % shuffledCodingTasks.length]}
+      />
       )}
 
       <AlertModal
-        isOpen={showAlert}
-        message={alertMessage}
-        onClose={() => setShowAlert(false)}
+      isOpen={showAlert}
+      message={alertMessage}
+      onClose={() => setShowAlert(false)}
       />
 
       <WinModal isOpen={hasWon} />
       <GameOverModal isOpen={isGameOver} />
 
       <footer className="absolute bottom-4 w-full text-center text-white">
-        <p>2025 © All rights reserved by Eureka Club</p>
+      <p>2025 © All rights reserved by Eureka Club</p>
       </footer>
     </div>
   );

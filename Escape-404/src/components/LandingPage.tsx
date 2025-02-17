@@ -66,11 +66,44 @@ const LandingPage = () => {
         <div className="flex justify-center">
           <button
             onClick={() => navigate('/game')}
-            className="w-64 px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-all duration-300 border border-white/20"
+            className="w-64 px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-lg backdrop-blur-sm transition-all duration-300 border border-white/20 hover:bg-gradient-to-r hover:from-green-400 hover:to-blue-500"
           >
             Start Game
           </button>
         </div>
+      </div>
+
+      <div className="absolute top-4 right-4 text-lg bg-black/40 p-4 rounded-lg backdrop-blur-sm max-h-96 overflow-y-auto" style={{ width: '350px' }}>
+        <h2 className="text-xl font-bold text-white mb-2">Instructions</h2>
+        <p className="text-white">
+          <strong>Gameplay:</strong>
+          <br />At each point in the maze, you will be presented with four options:
+          <br />1. Question: Answer a knowledge-based question.
+          <br />2. Puzzle: Solve a coding puzzle or riddle.
+          <br />3. Technical Task: Complete a simple technical challenge (e.g., coding snippet, basic software task).
+          <br />4. Physical Task: Perform a small physical activity.
+          <br />
+          <br />
+          <strong>Choosing Your Path:</strong>
+          <br />• Selecting an option will lead you to the corresponding challenge.
+          <br />• Successfully completing the challenge will move your team forward in the maze. The specific path you take depends on which option you choose.
+          <br />• Failing a challenge will result in losing a life. If you lose all your lives, then the game would come to an end.
+          <br />
+          <br />  
+          <strong>Scoring and Time:</strong>
+          <br />• Your team's progress through the maze is tracked by time.
+          <br />• Successful completion of challenges will earn you points, which can translate to time deductions.
+          <br />• Unsuccessful attempts will result in deduction of lives.
+          <br />• The team with the lowest calculated time wins. This is the actual time taken plus any time adjustments (deductions or additions) based on your points.
+          <br />
+          <br />
+          <strong>Important Information - Refreshing the Page:</strong>
+          <br />Do not refresh the webpage during the game! If you refresh the page, your progress will be lost, and you will have to start the game from the beginning. Re-attempts are not allowed. Please ensure a stable internet connection to avoid accidental refreshes.
+          <br />
+          <br />
+          <strong>Winning the Game:</strong>
+          <br />The team that reaches the end of the maze with the lowest calculated time will be declared the winner.
+        </p>
       </div>
 
       <div className="absolute bottom-4 left-4 text-lg bg-black/40 p-4 rounded-lg backdrop-blur-sm">
